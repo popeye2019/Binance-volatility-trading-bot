@@ -6,16 +6,20 @@ import sys
 # used for directory handling
 import glob
 
+import threading
+lock = threading.Lock()
+
+
 import time
 
 MY_EXCHANGE = 'BINANCE'
 MY_SCREENER = 'CRYPTO'
 MY_FIRST_INTERVAL = Interval.INTERVAL_1_MINUTE
 MY_SECOND_INTERVAL = Interval.INTERVAL_5_MINUTES
-TA_BUY_THRESHOLD = 18 # How many of the 26 indicators to indicate a buy
+TA_BUY_THRESHOLD = 4 # How many of the 26 indicators to indicate a buy
 PAIR_WITH = 'USDT'
 TICKERS = 'signalsample.txt'
-TIME_TO_WAIT = 4 # Minutes to wait between analysis
+TIME_TO_WAIT = 6 # Minutes to wait between analysis
 FULL_LOG = False # List anylysis result to console
 
 def analyze(pairs):
@@ -71,9 +75,11 @@ def analyze(pairs):
                 taMaxCoin = pair
         if first_tacheck >= TA_BUY_THRESHOLD and second_tacheck >= TA_BUY_THRESHOLD:
                 signal_coins[pair] = pair
-                print(f'Signalsample: Signal detected on {pair}')
+                lock.acquire()
+                print(f'Signalsample: Signal detected on {pair} at level {second_tacheck}')
                 with open('signals/signalsample.exs','a+') as f:
                     f.write(pair + '\n')
+                lock.release()   
     print(f'Signalsample: Max signal by {taMaxCoin} at {taMax} on shortest timeframe') 
 
     return signal_coins
