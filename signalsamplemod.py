@@ -30,8 +30,10 @@ def analyze(pairs):
     second_analysis = {}
     first_handler = {}
     second_handler = {}
+    lock.acquire()
     if os.path.exists('signals/signalsample.exs'):
         os.remove('signals/signalsample.exs')
+    lock.release()
 
     for pair in pairs:
         first_handler[pair] = TA_Handler(
