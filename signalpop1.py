@@ -55,7 +55,7 @@ MY_THIRD_INTERVAL = Interval.INTERVAL_5_MINUTES
 TA_BUY_THRESHOLD = 10 # How many of the 26 indicators to indicate a buy
 PAIR_WITH = 'USDT'
 TICKERS = 'signalsample.txt'
-TIME_TO_WAIT = 0.1 # Minutes to wait between analysis
+TIME_TO_WAIT = 1 # Minutes to wait between analysis
 FULL_LOG = False # List anylysis result to console
 
 def download(pairs):

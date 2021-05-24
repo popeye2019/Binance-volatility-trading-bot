@@ -7,6 +7,8 @@ import sys
 import glob
 import asyncio
 import time
+from datetime import date, datetime, timedelta
+
 import json
 
 import threading
@@ -24,6 +26,25 @@ class txcolors:
     
 from colorama import init
 init()
+
+#old_out = sys.stdout
+#class St_ampe_dOut:
+#    """Stamped stdout."""
+#    nl = True
+#    def write(self, x):
+#        """Write function overloaded."""
+#        if x == '\n':
+#            old_out.write(x)
+#            self.nl = True
+#        elif self.nl:
+#            old_out.write(f'{txcolors.DIM}[{str(datetime.now().replace(microsecond=0))}]{txcolors.DEFAULT} {x}')
+#            self.nl = False
+#        else:
+#            old_out.write(x)
+#
+#    def flush(self):
+#        pass
+#sys.stdout = St_ampe_dOut()
 
 NB_THREAD=5
 
@@ -62,31 +83,35 @@ def analyze(dictionary_coin):
     
     print (f'{txcolors.WARNING}First 1 mins check higher{txcolors.DEFAULT}')
     dictionary_coin.sort(key=lambda a: a[1],reverse=True)
-    for elem in dictionary_coin:
-        if elem[1] >= TA_BUY_THRESHOLD:
-            print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}' )    
-    if FULL_LOG: print (dictionary_coin[0:4])
+    if FULL_LOG:
+        for elem in dictionary_coin:
+            if elem[1] >= TA_BUY_THRESHOLD:
+                print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}' )    
+    if not FULL_LOG: print (dictionary_coin[0:MAX_COINS_PER_SCAN])
     
     print (f'{txcolors.WARNING}second 5 mins check higher{txcolors.DEFAULT}')
     dictionary_coin.sort(key=lambda a: a[2],reverse=True)
-    for elem in dictionary_coin:
-        if elem[2] >= TA_BUY_THRESHOLD:
-            print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}' )    
-    if FULL_LOG: print (dictionary_coin[0:4])
+    if FULL_LOG:
+        for elem in dictionary_coin:
+            if elem[2] >= TA_BUY_THRESHOLD:
+                print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}' )    
+    if  not FULL_LOG: print (dictionary_coin[0:MAX_COINS_PER_SCAN])
     
     print (f'{txcolors.WARNING}third 15 mins MACD check{txcolors.DEFAULT}')
     dictionary_coin.sort(key=lambda a: a[3],reverse=True)
-    for elem in dictionary_coin:
-        if (elem[3]>0.0):                  
-            print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}')    
-    if FULL_LOG: print (dictionary_coin[0:4])
+    if FULL_LOG:
+        for elem in dictionary_coin:
+            if (elem[3]>0.0):                  
+                print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}')    
+    if not FULL_LOG: print (dictionary_coin[0:MAX_COINS_PER_SCAN])
     
     print (f'{txcolors.WARNING}Fourth 15 mins indicator check{txcolors.DEFAULT}')
     dictionary_coin.sort(key=lambda a: a[4],reverse=True)
-    for elem in dictionary_coin:
-        if elem[4]=="BUY":
-            print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}')       
-    if FULL_LOG: print (dictionary_coin[0:4])
+    if FULL_LOG:
+        for elem in dictionary_coin:
+            if elem[4]=="BUY":
+                print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}')       
+    if not FULL_LOG: print (dictionary_coin[0:MAX_COINS_PER_SCAN])
     #####################################create a virtual indicator
     dictionary_coin.sort()
     for elem in dictionary_coin:
@@ -104,10 +129,11 @@ def analyze(dictionary_coin):
         elem.append(magique)
     print (f'{txcolors.WARNING}Liste by magique counter{txcolors.DEFAULT}')
     dictionary_coin.sort(key=lambda a: a[5],reverse=True)
-    for elem in dictionary_coin:
-        if elem[5]> 31.0:
-            print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}')
-    if FULL_LOG: print (dictionary_coin[0:4])
+    if FULL_LOG:
+        for elem in dictionary_coin:
+            if elem[5]> 31.0:
+                print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}')
+    if not FULL_LOG: print (dictionary_coin[0:MAX_COINS_PER_SCAN])
     print (f'{txcolors.WARNING}List to buy{txcolors.DEFAULT}')    
     for elem in dictionary_coin:
         if elem[5] >= 31.0:
@@ -121,7 +147,7 @@ def analyze(dictionary_coin):
             if ((elem[5] >= 31.0) and (count_sortie <= MAX_COINS_PER_SCAN)):
                 count_sortie += 1
                 f.write(elem[0] + '\n' )
-                print (f'signalpopeye: {elem}')
+                if FULL_LOG: print (f'signalpopeye: {elem}')
     f.close()
     lock.release()   
     
@@ -151,7 +177,7 @@ def do_work():
         process=0
         first_index=0
 
-    
+        commands=[]
         for i in range (0+NB_THREAD,len(pairs)+NB_THREAD,NB_THREAD):
             fin = i -1
             if (fin>=len(pairs)) : fin = (len(pairs) -1)
@@ -171,7 +197,7 @@ def do_work():
 
         tps2 = time.time()
         print(f'Temps de requete : {(tps2 - tps1)}')
-    #Launch association================================================
+#Launch association================================================
         process=0
         first_index=0
         commands=[]
@@ -192,14 +218,14 @@ def do_work():
                 contents = json.loads(j.read())
                 dictionary_coin=dictionary_coin+contents
             j.close()
-            os.remove(file_name)
- #===============Remove all .json file
-        #fichiers = glob.glob('./json/*.json')
-        #for f in fichiers:
-        #    try:
-        #        os.remove(f)
-        #    except OSError as e:
-        #        print("Error: %s : %s" % (f, e.strerror))           
+            #os.remove(file_name)
+#===============Remove all .json file
+        fichiers = glob.glob('./json/*.json')
+        for f in fichiers:
+            try:
+                os.remove(f)
+            except OSError as e:
+                print("Error: %s : %s" % (f, e.strerror))           
             
         #print("==========================================================")
         #print (dictionary_coin)
