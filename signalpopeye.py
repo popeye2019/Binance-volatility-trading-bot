@@ -23,28 +23,7 @@ class txcolors:
     SELL_PROFIT = '\033[32m'
     DIM = '\033[2m\033[35m'
     DEFAULT = '\033[39m'
-    
-from colorama import init
-init()
 
-#old_out = sys.stdout
-#class St_ampe_dOut:
-#    """Stamped stdout."""
-#    nl = True
-#    def write(self, x):
-#        """Write function overloaded."""
-#        if x == '\n':
-#            old_out.write(x)
-#            self.nl = True
-#        elif self.nl:
-#            old_out.write(f'{txcolors.DIM}[{str(datetime.now().replace(microsecond=0))}]{txcolors.DEFAULT} {x}')
-#            self.nl = False
-#        else:
-#            old_out.write(x)
-#
-#    def flush(self):
-#        pass
-#sys.stdout = St_ampe_dOut()
 
 NB_THREAD=5
 
@@ -61,6 +40,8 @@ PAIR_WITH = 'USDT'
 TICKERS = 'signalsample.txt'
 TIME_TO_WAIT = 1 # Minutes to wait between analysis
 FULL_LOG = False # List anylysis result to console
+
+
 async def run(shell_command):
     p = await asyncio.create_subprocess_shell(shell_command)
     await p.communicate()
@@ -135,7 +116,7 @@ def analyze(dictionary_coin):
                 print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}')
     if not FULL_LOG: print (dictionary_coin[0:MAX_COINS_PER_SCAN])
     print (f'{txcolors.WARNING}List to buy{txcolors.DEFAULT}')    
-    for elem in dictionary_coin:
+    for elem in dictionary_coin[0:MAX_COINS_PER_SCAN]:
         if elem[5] >= 31.0:
             print (f'{txcolors.BUY}{elem}{txcolors.DEFAULT}' )    
     #print (dictionary_coin[0:4])
@@ -143,11 +124,10 @@ def analyze(dictionary_coin):
 #=======================================================vers le bot
     lock.acquire()
     with open('signals/signalsample.exs','a+') as f:
-        for elem in dictionary_coin:
-            if ((elem[5] >= 31.0) and (count_sortie <= MAX_COINS_PER_SCAN)):
-                count_sortie += 1
-                f.write(elem[0] + '\n' )
-                if FULL_LOG: print (f'signalpopeye: {elem}')
+        for elem in dictionary_coin[0:MAX_COINS_PER_SCAN]:
+            #if ((elem >= 31.0):
+            f.write(elem[0] + '\n' )
+            if FULL_LOG: print (f'signalpopeye: {elem}')
     f.close()
     lock.release()   
     
@@ -214,10 +194,13 @@ def do_work():
 #===========================================read and add to dictionary_coin
         dictionary_coin=[]
         for file_name in commands:
-            with open(file_name, 'r') as j:
-                contents = json.loads(j.read())
-                dictionary_coin=dictionary_coin+contents
-            j.close()
+            try:
+                with open(file_name, 'r') as j:
+                    contents = json.loads(j.read())
+                    dictionary_coin=dictionary_coin+contents
+            except:
+                Print('Manque un fichier !! ??')
+                j.close()
             #os.remove(file_name)
 #===============Remove all .json file
         fichiers = glob.glob('./json/*.json')

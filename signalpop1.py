@@ -12,40 +12,6 @@ import time
 from datetime import date, datetime, timedelta
 
 
-# for colourful logging to the console
-class txcolors:
-    BUY = '\033[92m'
-    WARNING = '\033[93m'
-    SELL_LOSS = '\033[91m'
-    SELL_PROFIT = '\033[32m'
-    DIM = '\033[2m\033[35m'
-    DEFAULT = '\033[39m'
-    
-from colorama import init
-init()
-
-# print with timestamps
-old_out = sys.stdout
-class St_ampe_dOut:
-    """Stamped stdout."""
-    nl = True
-    def write(self, x):
-        """Write function overloaded."""
-        if x == '\n':
-            old_out.write(x)
-            self.nl = True
-        elif self.nl:
-            old_out.write(f'{txcolors.DIM}[{str(datetime.now().replace(microsecond=0))}]{txcolors.DEFAULT} {x}')
-            self.nl = False
-        else:
-            old_out.write(x)
-
-    def flush(self):
-        pass
-
-sys.stdout = St_ampe_dOut()
-
-
 MY_EXCHANGE = 'BINANCE'
 MY_SCREENER = 'CRYPTO'
 MY_FIRST_INTERVAL = Interval.INTERVAL_1_MINUTE
@@ -129,7 +95,7 @@ def download(pairs):
             file_name='./json/coins'+str(val_debut)+'-'+str(val_fin)+'.json'
             fichier = open(file_name, 'w+')
         except:
-            print (f"oups file pb")
+            print (f'oups file pb')
         json.dump(dictionary_coin, fichier)
         
         fichier.close()
