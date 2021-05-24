@@ -1,6 +1,8 @@
 from tradingview_ta import TA_Handler, Interval, Exchange
 import os
 import time
+import threading
+lock = threading.Lock()
 
 INTERVAL = Interval.INTERVAL_1_MINUTE #Timeframe for analysis
 
@@ -44,12 +46,14 @@ def do_work():
     while True:
         print(f'pausebotmod: Fetching market state')
         paused = analyze()
+        lock.acquire()
         if paused:
+			
             with open('signals/paused.exc','a+') as f:
                 f.write('yes')
         else:
             if os.path.isfile("signals/paused.exc"):
                 os.remove('signals/paused.exc')
-                        
+        lock.release()                
         print(f'pausebotmod: Waiting {TIME_TO_WAIT} minutes for next market checkup')    
         time.sleep((TIME_TO_WAIT*60))

@@ -58,10 +58,10 @@ trading_options:
   TRAILING_TAKE_PROFIT: .1
   
   # Trading fee in % per trade.
-  TRADING_FEE: .075
+  TRADING_FEE: .100
   
   SIGNALLING_MODULES:
     - pausebotmod
-    - signalsamplemod
+    - signalpopeye
     
   
